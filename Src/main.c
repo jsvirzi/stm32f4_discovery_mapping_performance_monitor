@@ -37,12 +37,19 @@
 
 /* USER CODE BEGIN Includes */
 
+#include "serial.h"
+#include "uart.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+int clockTicks = 0;
+int nPulses = 0;
+int verbose = 0;
 
 /* USER CODE END PV */
 
@@ -81,6 +88,14 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
+	unsigned int value = huart1.Instance->CR1;
+	value |= uartRxNEIE;
+	huart1.Instance->CR1 = value;
+	
+	value = huart2.Instance->CR1;
+	value |= uartRxNEIE;
+	huart2.Instance->CR1 = value;
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -91,6 +106,12 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
+	  int timeout = clockTicks + 1000;
+	  while(clockTicks < timeout);
+	  char str[64];
+	  snprintf(str, sizeof(str), "%d pulses received\n", nPulses);
+	  cat(str);
+	  
   }
   /* USER CODE END 3 */
 

@@ -37,6 +37,9 @@
 
 /* USER CODE BEGIN 0 */
 
+extern int clockTicks;
+extern int nPulses;
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -169,6 +172,8 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+	
+	++clockTicks;
 
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
@@ -205,6 +210,10 @@ void EXTI0_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+	
+	if(EXTI->PR & (1 << 0)) {
+		++nPulses;
+	}
 
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
