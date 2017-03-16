@@ -37,6 +37,9 @@
 
 /* USER CODE BEGIN 0 */
 
+#include "serial.h"
+#include "uart.h"
+
 extern int clockTicks;
 extern int nPulses;
 
@@ -197,6 +200,10 @@ void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
 
+	if(EXTI->PR & (1 << 0)) {
+		++nPulses;
+	}
+	
   /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_IRQn 1 */
@@ -211,9 +218,10 @@ void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
 	
-	if(EXTI->PR & (1 << 0)) {
-		++nPulses;
-	}
+	if(huart1.Instance->SR & uartRxNE) {
+		unsigned char ch = huart1.Instance->DR;
+		pushSimpleCircularQueue(&uart1RxQueue, &ch, 1);
+	}	
 
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
@@ -229,6 +237,11 @@ void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
 
+	if(huart2.Instance->SR & uartRxNE) {
+		unsigned char ch = huart2.Instance->DR;
+		pushSimpleCircularQueue(&uart2RxQueue, &ch, 1);
+	}
+		
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */

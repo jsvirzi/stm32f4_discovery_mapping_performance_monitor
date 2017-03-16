@@ -70,6 +70,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	
+	initUarts();
 
   /* USER CODE END 1 */
 
@@ -107,7 +109,8 @@ int main(void)
   /* USER CODE BEGIN 3 */
 
 	  int timeout = clockTicks + 1000;
-	  while(clockTicks < timeout);
+	  while(clockTicks < timeout) processUarts();
+	  // huart2.Instance->DR = 'a';
 	  char str[64];
 	  snprintf(str, sizeof(str), "%d pulses received\n", nPulses);
 	  cat(str);
