@@ -34,6 +34,7 @@
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 #include "gpio.h"
+#include "string.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -51,6 +52,8 @@ int clockTicks = 0;
 int nPulses = 0;
 int verbose = 0;
 
+char gprmcMsg[128];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +66,31 @@ void Error_Handler(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+float lat = 144326.00;
+float lon = 5107.0017737;
+void generateGPRMC(char *msg, int msgSize) {
+	int ss = clockTicks / 1000;
+	int hh = ss / 3600;
+	ss -= hh * 3600;
+	int mm = ss/ 60;
+	ss -= mm * 60;
+	const char *format = "$GPRMC,%02d%02d%02d.00,A,5107.0017737,N,11402.3291611,W,0.080,323.3,3,080417,0.0,E,A*00";
+	snprintf(msg, msgSize, format, hh, mm, ss);
+	
+#if 0
+/* the checksum for the next sentence should be 0x28 which means the A*00 should be replaced by A*28 */	
+	snprintf(msg, msgSize, "$GPGLL,5300.97914,N,00259.98174,E,125926,A*00");
+#endif
+	
+	int msgLength = strlen(msg);
+	int i, checkSumLength = msgLength - 4; /* between $ and * */
+	unsigned char checkSum = 0, *payload = (unsigned char *)(msg + 1);	
+	for(i=0;i<checkSumLength;++i) {
+		checkSum = checkSum ^ payload[i];
+	}
+	snprintf(&msg[msgLength-2], msgSize, "%2.2x", checkSum); 
+}
 
 /* USER CODE END 0 */
 
@@ -110,10 +138,12 @@ int main(void)
 
 	  int timeout = clockTicks + 1000;
 	  while(clockTicks < timeout) processUarts();
+	  generateGPRMC(gprmcMsg, sizeof(gprmcMsg));
+	  cat(gprmcMsg);
 	  // huart2.Instance->DR = 'a';
-	  char str[64];
-	  snprintf(str, sizeof(str), "%d pulses received\n", nPulses);
-	  cat(str);
+	  // char str[64];
+	  // snprintf(str, sizeof(str), "%d pulses received\n", nPulses);
+	  // cat(str);
 	  
   }
   /* USER CODE END 3 */
